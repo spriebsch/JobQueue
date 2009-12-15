@@ -1,0 +1,63 @@
+<project name="JobQueue" default="build" basedir=".">
+
+    <property name="src"      location="src"/>
+    <property name="tests"    location="tests"/>
+
+    <property name="build"    location="_build"/>
+    <property name="docs"     location="_docs"/>
+    <property name="coverage" location="_coverage"/>
+
+    <target name="init">
+        <mkdir dir="${build}"/>
+        <mkdir dir="${docs}"/>
+        <mkdir dir="${coverage}"/>
+    </target>
+
+    <target name="autoload">
+        <exec executable="php" failonerror="true">
+            <arg value="scripts/autoload.php"/>
+            <arg value="${src}"/>
+            <arg value="${src}/Autoload.php"/>
+        </exec>
+        <exec executable="php" failonerror="true">
+            <arg value="scripts/autoload.php"/>
+            <arg value="${tests}"/>
+            <arg value="${tests}/Autoload.php"/>
+        </exec>
+    </target>
+
+    <target name="test" depends="init, autoload">
+        <exec executable="phpunit" failonerror="true"/>
+    </target>
+
+    <target name="phar" depends="init">
+        <exec executable="php" failonerror="true">
+            <arg value="scripts/create_phar.php"/>
+            <arg value="${src}"/>
+            <arg value="${build}/${ant.project.name}.phar"/>
+        </exec>
+    </target>
+
+    <target name="doc" depends="init">
+        <exec executable="phpdoc" failonerror="true">
+            <arg value="-d"/>
+            <arg value="${src}"/>
+            <arg value="-t"/>
+            <arg value="${docs}"/>
+            <arg value="-o"/>
+            <arg value="HTML:frames:earthli"/>
+            <arg value="-i"/>
+            <arg value="Autoload.php"/>
+        </exec>
+    </target>
+
+    <target name="build" depends="clean, autoload, test, doc, phar">
+    </target>
+
+    <target name="clean">
+        <delete dir="${build}"/>
+        <delete dir="${docs}"/>
+        <delete dir="${coverage}"/>
+    </target>
+
+</project>
