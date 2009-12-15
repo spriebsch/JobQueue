@@ -59,7 +59,7 @@ class Queue implements \Countable
      * @var Resource
      */
     protected $fileHandle = false;
-
+    
     /**
      * Constructor 
      *
@@ -159,6 +159,7 @@ class Queue implements \Countable
         $data = serialize($this->queue);
 
         $length = fwrite($this->fileHandle, $data);
+        ftruncate($this->fileHandle, strlen($data));
         
         // Make sure all data was written to the queue file.
         if ($length === false || $length != strlen($data)) {

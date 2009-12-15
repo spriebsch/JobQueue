@@ -175,5 +175,31 @@ class QueueTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertNull($this->queue->dequeue());
     }
+
+    /**
+     * @covers spriebsch\JobQueue\Queue
+     */
+    public function testEnqueueAlsoWorksOnEmptiedQueue()
+    {
+        $obj1 = new Object();
+        $obj2 = new Object();
+        $obj3 = new Object();
+        $obj4 = new Object();
+        
+        $this->queue->enqueue($obj1);
+        $this->queue->enqueue($obj2);
+        $this->queue->enqueue($obj3);
+
+        $this->queue->dequeue();
+        $this->queue->dequeue();
+
+        $this->queue->enqueue($obj4);
+        
+        $queue = $this->readQueueFile();
+
+        $this->assertEquals(2, count($queue));
+        $this->assertEquals($obj1, $queue[0]);
+        $this->assertEquals($obj4, $queue[1]);
+    }
 }
 ?>
