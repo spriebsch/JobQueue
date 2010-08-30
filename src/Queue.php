@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2009 Stefan Priebsch <stefan@priebsch.de>
+ * Copyright (c) 2009-2010 Stefan Priebsch <stefan@priebsch.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -37,23 +37,20 @@
 
 namespace spriebsch\JobQueue;
 
+use Countable;
+
 /**
- * A queue of jobs (PHP objects) persistently stored in a file.
+ * A persistent job queue stored in a file.
  * Ensures queue consistency by exclusive file locking.
  *
  * @author Stefan Priebsch <stefan@priebsch.de>
  */
-class Queue implements \Countable
+class Queue extends QueueStub implements Countable
 {
     /**
      * @var string
      */
     protected $filename;
-    
-    /**
-     * @var array
-     */
-    protected $queue = array();
 
     /**
      * @var Resource
@@ -95,7 +92,7 @@ class Queue implements \Countable
      * Unlocks and closes the queue file.
      *
      * @return null
-     * 
+     *
      * @throws Exception Could not close and unlock queue file
      */
     protected function unlock()
@@ -107,7 +104,7 @@ class Queue implements \Countable
 
     /**
      * Loads and unserializes the queue from disk.  
-     * 
+     *
      * @return null
      */
     protected function load()

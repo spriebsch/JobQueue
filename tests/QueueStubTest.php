@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2009 Stefan Priebsch <stefan@priebsch.de>
+ * Copyright (c) 2009-2010 Stefan Priebsch <stefan@priebsch.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -37,51 +37,27 @@
 
 namespace spriebsch\JobQueue;
 
+use PHPUnit_Framework_TestCase;
+
 /**
- * Unit tests for the Queue class. 
+ * Unit tests for the QueueStub class.
  *
  * @author Stefan Priebsch <stefan@priebsch.de>
  */
-class QueueTest extends \PHPUnit_Framework_TestCase
+class QueueStubTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
-        $this->filename = tempnam(sys_get_temp_dir(), 'jobqueue_');
-        $this->queue = new Queue($this->filename);
+        $this->queue = new QueueStub();
     }
 
     protected function tearDown()
     {
-        unlink($this->filename);
         unset($this->queue);
     }
 
-    protected function readQueueFile()
-    {
-        if (!file_exists($this->filename)) {
-            $this->fail('No queue file "' . $this->filename . '" found');
-        }
-
-        $contents = file_get_contents($this->filename);
-        $data = unserialize($contents);
-
-        if ($data === false) {
-            $this->fail('Could not unserialize SplQueue from "' . $contents . '"');
-        }
-
-        return $data;
-    }
-
     /**
-     * @covers spriebsch\JobQueue\Queue::__construct
-     */
-    public function testConstruct()
-    {
-        $this->assertType('spriebsch\\JobQueue\\Queue', $this->queue);
-    }
-
-    /**
-     * @covers spriebsch\JobQueue\Queue
+     * @covers spriebsch\JobQueue\QueueStub
      */
     public function testQueueInitiallyIsEmpty()
     {
@@ -89,7 +65,7 @@ class QueueTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers spriebsch\JobQueue\Queue
+     * @covers spriebsch\JobQueue\QueueStub
      */
     public function testEnqueueAddsObjectToQueue()
     {
@@ -97,14 +73,12 @@ class QueueTest extends \PHPUnit_Framework_TestCase
 
         $this->queue->enqueue($obj);
 
-        $queue = $this->readQueueFile();
-
-        $this->assertEquals(1, count($queue));
-        $this->assertEquals($obj, $queue[0]);
+        $this->assertEquals(1, count($this->queue));
+        $this->assertEquals($obj, $this->queue->dequeue());
     }
 
     /**
-     * @covers spriebsch\JobQueue\Queue
+     * @covers spriebsch\JobQueue\QueueStub
      */
     public function testCountReturnsNumberOfObjectsInQueue()
     {
@@ -116,7 +90,7 @@ class QueueTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers spriebsch\JobQueue\Queue
+     * @covers spriebsch\JobQueue\QueueStub
      */
     public function testEnqueueAddsObjectsToEndOfQueue()
     {
@@ -126,15 +100,13 @@ class QueueTest extends \PHPUnit_Framework_TestCase
         $this->queue->enqueue($obj1);
         $this->queue->enqueue($obj2);
 
-        $queue = $this->readQueueFile();
-
-        $this->assertEquals(2, count($queue));
-        $this->assertEquals($obj1, $queue[0]);
-        $this->assertEquals($obj2, $queue[1]);
+        $this->assertEquals(2, count($this->queue));
+        $this->assertEquals($obj2, $this->queue->dequeue());
+        $this->assertEquals($obj1, $this->queue->dequeue());
     }
 
     /**
-     * @covers spriebsch\JobQueue\Queue
+     * @covers spriebsch\JobQueue\QueueStub
      */
     public function testDequeueRemovesObjectFromQueue()
     {
@@ -143,14 +115,12 @@ class QueueTest extends \PHPUnit_Framework_TestCase
         $this->queue->enqueue($obj);
         $result = $this->queue->dequeue();
 
-        $queue = $this->readQueueFile();
-
-        $this->assertEquals(0, count($queue));
-        $this->assertEquals($obj, $result);
+        $this->assertEquals(0, count($this->queue));
+        $this->assertSame($obj, $result);
     }
 
     /**
-     * @covers spriebsch\JobQueue\Queue
+     * @covers spriebsch\JobQueue\QueueStub
      */
     public function testDequeueRemovesObjectsFromTopOfQueue()
     {
@@ -162,14 +132,12 @@ class QueueTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->queue->dequeue();
 
-        $queue = $this->readQueueFile();
-
-        $this->assertEquals(1, count($queue));
-        $this->assertEquals($obj1, $result);
+        $this->assertEquals(1, count($this->queue));
+        $this->assertSame($obj1, $result);
     }
 
     /**
-     * @covers spriebsch\JobQueue\Queue
+     * @covers spriebsch\JobQueue\QueueStub
      */
     public function testDequeueReturnsNullOnEmptyQueue()
     {
@@ -177,9 +145,9 @@ class QueueTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers spriebsch\JobQueue\Queue
+     * @covers spriebsch\JobQueue\QueueStub
      */
-    public function testEnqueueAlsoWorksOnEmptiedQueue()
+    public function testEnqueueWorksOnEmptiedQueue()
     {
         $obj1 = new Object();
         $obj2 = new Object();
@@ -194,12 +162,10 @@ class QueueTest extends \PHPUnit_Framework_TestCase
         $this->queue->dequeue();
 
         $this->queue->enqueue($obj4);
-        
-        $queue = $this->readQueueFile();
 
-        $this->assertEquals(2, count($queue));
-        $this->assertEquals($obj1, $queue[0]);
-        $this->assertEquals($obj4, $queue[1]);
+        $this->assertEquals(2, count($this->queue));
+        $this->assertEquals($obj4, $this->queue->dequeue());
+        $this->assertEquals($obj1, $this->queue->dequeue());
     }
 }
 ?>
