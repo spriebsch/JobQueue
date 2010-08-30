@@ -38,8 +38,8 @@
 namespace spriebsch\JobQueue;
 
 /**
- * A queue of jobs (objects that implement the Queueable interface)
- * persistently stored in a file. 
+ * A queue of jobs (PHP objects) persistently stored in a file.
+ * Ensures queue consistency by exclusive file locking.
  *
  * @author Stefan Priebsch <stefan@priebsch.de>
  */
@@ -51,7 +51,7 @@ class Queue implements \Countable
     protected $filename;
     
     /**
-     * @var SplQueue
+     * @var array
      */
     protected $queue = array();
 
@@ -61,10 +61,7 @@ class Queue implements \Countable
     protected $fileHandle = false;
     
     /**
-     * Constructor 
-     *
-     * Since multiple queue objects can be used, we only create the 
-     * queue file when an array of values is passed to the constructor.
+     * Constructs the object.
      *
      * @param string $filename Filename to store the queue
      */
@@ -99,9 +96,7 @@ class Queue implements \Countable
      *
      * @return null
      * 
-     * @throws Exception Cannot unlock queue file that is not open
-     * @throws Exception Could not unlock queue file
-     * @throws Exception Could not close queue file
+     * @throws Exception Could not close and unlock queue file
      */
     protected function unlock()
     {
@@ -127,6 +122,7 @@ class Queue implements \Countable
 
         $contents = '';
 
+        // We do not use file_get_contents because we want to keep the lock.
         while (!feof($this->fileHandle)) {
             $contents .= fread($this->fileHandle, 8192);
         }
@@ -159,6 +155,8 @@ class Queue implements \Countable
         $data = serialize($this->queue);
 
         $length = fwrite($this->fileHandle, $data);
+        
+        // Set file length to length of new data.
         ftruncate($this->fileHandle, strlen($data));
         
         // Make sure all data was written to the queue file.
