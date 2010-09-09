@@ -117,14 +117,7 @@ class Queue extends QueueStub implements Countable
             return;
         }
 
-        $contents = '';
-
-        // We do not use file_get_contents because we want to keep the lock.
-        while (!feof($this->fileHandle)) {
-            $contents .= fread($this->fileHandle, 8192);
-        }
-        
-        $this->queue = unserialize($contents);
+        $this->queue = unserialize(stream_get_contents($this->fileHandle));
         
         // Unreadable queue file means empty queue.
         if ($this->queue === false) {
