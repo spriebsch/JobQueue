@@ -3,7 +3,7 @@
 $src = __DIR__ . '/../src';
 $dir = __DIR__ . '/../_phar';
 $file = __DIR__ . '/../_phar/JobQueue.phar';
-$stub = __DIR__ . '/_data/PharStub.php';
+$stub = __DIR__ . '/../templates/PharStub.php';
 
 if (ini_get('Phar.readonly')) {
     die('Error: Cannot create Phar. "Phar.readonly" must be set to Off in php.ini' . PHP_EOL);
@@ -20,8 +20,6 @@ if (!file_exists($dir)) {
 if (file_exists($file)) {
     unlink($file);
 }
-
-
 
 $phar = new Phar($file, 0, 'JobQueue.phar');
 $phar->buildFromDirectory($src);
