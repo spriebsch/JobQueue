@@ -1,12 +1,8 @@
 <?php
 
-var_dump('before');
-
 require __DIR__ . '/_build/JobQueue.phar';
 
-var_dump('after');
-
-$q = \spriebsch\JobQueue\Queue();
+$q = new spriebsch\JobQueue\Queue(sys_get_temp_dir() . '/testqueue');
 var_dump($q);
 
 ?>
