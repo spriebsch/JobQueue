@@ -212,4 +212,3 @@ class Queue extends QueueStub implements Countable
         return $object;
     }
 }
-?>

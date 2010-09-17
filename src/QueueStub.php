@@ -94,4 +94,3 @@ class QueueStub implements Countable
         return array_shift($this->queue);
     }
 }
-?>

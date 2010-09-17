@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="spriebsch">
+    <description>spriebsch's Coding Standard</description>
+  
+    <rule ref="Zend">
+        <exclude name="Generic.Files.LineLength.MaxExceeded"/>
+        <exclude name="Zend.NamingConventions.ValidVariableName.PrivateNoUnderscore"/>
+    </rule>
+    
+</ruleset>

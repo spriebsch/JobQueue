@@ -7,13 +7,11 @@ spl_autoload_register(
     function($class)
     {
         static $classes = array(
-            'spriebsch\\jobqueue\\object' => '/_testdata/Object.php',
-            'spriebsch\\jobqueue\\queuestubtest' => '/QueueStubTest.php',
-            'spriebsch\\jobqueue\\queuetest' => '/QueueTest.php'
+            ___CLASSLIST___
        );
        $cn = strtolower($class);
        if (isset($classes[$cn])) {
-        require __DIR__ . $classes[$cn];
+        require ___BASEDIR___$classes[$cn];
        }
     }
 );

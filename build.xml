@@ -13,16 +13,37 @@
         <mkdir dir="${coverage}"/>
     </target>
 
-    <target name="autoload">
-        <exec executable="php" failonerror="true">
-            <arg value="scripts/autoload.php"/>
-            <arg value="${src}"/>
-            <arg value="${src}/Autoload.php"/>
+    <target name="sniff" description="Runs PHP_CodeSniffer">
+        <exec executable="phpcs" failonerror="true">
+            <arg value="-s"/>
+            <arg value="--standard=${basedir}/spriebsch.xml"/>
+            <arg value="src"/>
         </exec>
-        <exec executable="php" failonerror="true">
-            <arg value="scripts/autoload.php"/>
-            <arg value="${tests}"/>
+        <exec executable="phpcs" failonerror="true">
+            <arg value="-s"/>
+            <arg value="--standard=${basedir}/spriebsch.xml"/>
+            <arg value="tests"/>
+        </exec>
+    </target>
+
+    <target name="autoload" description="Builds the autoloaders">
+        <exec executable="phpab" failonerror="true">
+            <arg value="-o"/>
+            <arg value="${src}/Autoload.php"/>
+            <arg value="--indent"/>
+            <arg value='"            "'/>
+            <arg value="-t"/>
+            <arg value="templates/autoload.php.tpl"/>
+            <arg value="${src}"/>
+        </exec>
+        <exec executable="phpab" failonerror="true">
+            <arg value="-o"/>
             <arg value="${tests}/Autoload.php"/>
+            <arg value="--indent"/>
+            <arg value='"            "'/>
+            <arg value="-t"/>
+            <arg value="templates/autoload.php.tpl"/>
+            <arg value="${tests}"/>
         </exec>
     </target>
 
@@ -32,7 +53,7 @@
 
     <target name="phar" depends="init">
         <exec executable="php" failonerror="true">
-            <arg value="scripts/create_phar.php"/>
+            <arg value="scripts/createPhar.php"/>
             <arg value="${src}"/>
             <arg value="${build}/${ant.project.name}.phar"/>
         </exec>
@@ -40,6 +61,8 @@
 
     <target name="doc" depends="init">
         <exec executable="phpdoc" failonerror="true">
+            <arg value="-dn"/>
+            <arg value="JobQueue"/>
             <arg value="-d"/>
             <arg value="${src}"/>
             <arg value="-t"/>

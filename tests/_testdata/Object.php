@@ -40,4 +40,3 @@ namespace spriebsch\JobQueue;
 class Object
 {
 }
-?>

@@ -168,4 +168,3 @@ class QueueStubTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($obj1, $this->queue->dequeue());
     }
 }
-?>

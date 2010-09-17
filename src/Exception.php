@@ -45,4 +45,3 @@ namespace spriebsch\JobQueue;
 class Exception extends \Exception
 {
 }
-?>

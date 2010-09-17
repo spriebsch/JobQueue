@@ -202,4 +202,3 @@ class QueueTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($obj4, $queue[1]);
     }
 }
-?>
