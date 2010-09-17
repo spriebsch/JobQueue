@@ -2,7 +2,7 @@
 
 var_dump('before');
 
-require __DIR__ . '/_phar/JobQueue.phar';
+require __DIR__ . '/_build/JobQueue.phar';
 
 var_dump('after');
 
