@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2009 Stefan Priebsch <stefan@priebsch.de>
+ * Copyright (c) 2009-2010 Stefan Priebsch <stefan@priebsch.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
