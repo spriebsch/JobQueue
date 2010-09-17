@@ -46,7 +46,9 @@ class QueueTest extends \PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
-        $this->filename = tempnam(sys_get_temp_dir(), 'jobqueue_');
+        $this->filename = sys_get_temp_dir() . '/jobqueue_' . uniqid();
+var_dump($this->filename);
+        
         $this->queue = new Queue($this->filename);
     }
 

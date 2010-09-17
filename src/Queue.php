@@ -77,6 +77,12 @@ class Queue extends QueueStub implements Countable
      */
     protected function lock()
     {
+        // For for problem that opening file in r+ mode does not create the file
+        // Thanks to zepi for discovering that problem
+        if (!file_exists($this->filename)) {
+            file_put_contents($this->filename, '');
+        }
+
         $this->fileHandle = fopen($this->filename, 'r+');
         
         if ($this->fileHandle === false) {
