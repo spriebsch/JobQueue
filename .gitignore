@@ -1,0 +1,6 @@
+.buildpath
+.project
+.settings/
+_build/
+_coverage/
+_docs/
