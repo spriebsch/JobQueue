@@ -51,6 +51,11 @@ class Queue extends QueueStub implements Countable
      * @var string
      */
     protected $filename;
+    
+    /**
+     * @var array
+     */
+    protected $queue = array();
 
     /**
      * @var Resource
@@ -72,25 +77,30 @@ class Queue extends QueueStub implements Countable
      *
      * @return null
      * 
+     * @throws Exception Could not write to queue file
      * @throws Exception Could not open queue file
      * @throws Exception Could not lock queue file
      */
     protected function lock()
     {
-        // For for problem that opening file in r+ mode does not create the file
-        // Thanks to zepi for discovering that problem
+        // Fix: opening file in r+ mode does not create the file (thanks to zepi)
         if (!file_exists($this->filename)) {
-            file_put_contents($this->filename, '');
+            // Error silencing operator to prevent unit test from failing
+            $result = @file_put_contents($this->filename, serialize(array()));
+            
+            if (!$result) {
+                throw new Exception('Could not write to queue file "' . $this->filename . '"');
+            }
         }
 
         $this->fileHandle = fopen($this->filename, 'r+');
         
         if ($this->fileHandle === false) {
-            throw new Exception('Could not open queue file');
+            throw new Exception('Could not open queue file "' . $this->filename . '"');
         }
 
         if (flock($this->fileHandle, LOCK_EX) === false) {
-            throw new Exception('Could not lock queue file');
+            throw new Exception('Could not lock queue file "' . $this->filename . '"');
         }
     }
 
@@ -104,7 +114,7 @@ class Queue extends QueueStub implements Countable
     protected function unlock()
     {
         if (fclose($this->fileHandle) === false) {
-            throw new Exception('Could not close and unlock queue file');
+            throw new Exception('Could not close and unlock queue file "' . $this->filename . '"');
         }
     }
 
@@ -112,22 +122,17 @@ class Queue extends QueueStub implements Countable
      * Loads and unserializes the queue from disk.  
      *
      * @return null
+     *
+     * @throws Exception Could not read the queue (unserialize failed)
      */
     protected function load()
     {
         $this->lock();
 
-        // Non-existing or empty queue file means empty queue.
-        if (!file_exists($this->filename)) {
-            $this->queue = array();
-            return;
-        }
-
         $this->queue = unserialize(stream_get_contents($this->fileHandle));
         
-        // Unreadable queue file means empty queue.
         if ($this->queue === false) {
-            $this->queue = array();
+            throw new Exception('Could not read the queue "' . $this->filename . '" (unserialize failed)');
         }
     }
 
@@ -145,7 +150,7 @@ class Queue extends QueueStub implements Countable
         $result = fseek($this->fileHandle, 0);
 
         if ($result != 0) {
-            throw new Exception('Could not save the queue (fseek failed)');
+            throw new Exception('Could not save the queue "' . $this->filename . '" (fseek failed)');
         }
 
         $data = serialize($this->queue);
@@ -157,7 +162,7 @@ class Queue extends QueueStub implements Countable
         
         // Make sure all data was written to the queue file.
         if ($length === false || $length != strlen($data)) {
-            throw new Exception('Could not save the queue (fwrite failed)');
+            throw new Exception('Could not save the queue ""' . $this->filename . '"" (fwrite failed)');
         }
         
         $this->unlock();
@@ -192,11 +197,13 @@ class Queue extends QueueStub implements Countable
      *
      * @param Object $object
      * @return null
+     *
+     * @throws Exception Cannot enqueue non-objects
      */
     public function enqueue($object)
     {
         if (!is_object($object)) {
-            throw new Exception('Cannot enqueue non-objects');
+            throw new Exception('Cannot enqueue non-objects (' . $object . ')');
         }
 
         $this->load();

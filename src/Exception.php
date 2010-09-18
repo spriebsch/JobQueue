@@ -37,6 +37,8 @@
 
 namespace spriebsch\JobQueue;
 
+// @codeCoverageIgnoreStart
+
 /**
  * Exception. 
  *
@@ -45,3 +47,4 @@ namespace spriebsch\JobQueue;
 class Exception extends \Exception
 {
 }
+// @codeCoverageIgnoreEnd

@@ -43,6 +43,8 @@ use PHPUnit_Framework_TestCase;
  * Unit tests for the QueueStub class.
  *
  * @author Stefan Priebsch <stefan@priebsch.de>
+ *
+ * @covers spriebsch\JobQueue\QueueStub
  */
 class QueueStubTest extends PHPUnit_Framework_TestCase
 {
@@ -56,17 +58,24 @@ class QueueStubTest extends PHPUnit_Framework_TestCase
         unset($this->queue);
     }
 
-    /**
-     * @covers spriebsch\JobQueue\QueueStub
-     */
     public function testQueueInitiallyIsEmpty()
     {
         $this->assertEquals(0, count($this->queue));
     }
 
+    public function testDequeueReturnsNullOnEmptyQueue()
+    {
+        $this->assertNull($this->queue->dequeue());
+    }
+
     /**
-     * @covers spriebsch\JobQueue\QueueStub
+     * @expectedException spriebsch\JobQueue\Exception
      */
+    public function testThrowsExceptionWhenAddingNonObjectToQueue()
+    {
+        $this->queue->enqueue('nonsense');
+    }
+
     public function testEnqueueAddsObjectToQueue()
     {
         $obj = new Object();
@@ -74,24 +83,30 @@ class QueueStubTest extends PHPUnit_Framework_TestCase
         $this->queue->enqueue($obj);
 
         $this->assertEquals(1, count($this->queue));
+    }
+
+    public function testDequeueFetchesObjectFromQueue()
+    {
+        $obj = new Object();
+
+        $this->queue->enqueue($obj);
+
+        // Uses assertEquals since reference is not the same after
+        // serializing and unserializing the object.
         $this->assertEquals($obj, $this->queue->dequeue());
     }
 
-    /**
-     * @covers spriebsch\JobQueue\QueueStub
-     */
     public function testCountReturnsNumberOfObjectsInQueue()
     {
         $obj = new Object();
 
         $this->queue->enqueue($obj);
+        $this->queue->enqueue($obj);
+        $this->queue->enqueue($obj);
         
-        $this->assertEquals(1, count($this->queue));
+        $this->assertEquals(3, count($this->queue));
     }
 
-    /**
-     * @covers spriebsch\JobQueue\QueueStub
-     */
     public function testEnqueueAddsObjectsToEndOfQueue()
     {
         $obj1 = new Object();
@@ -100,14 +115,10 @@ class QueueStubTest extends PHPUnit_Framework_TestCase
         $this->queue->enqueue($obj1);
         $this->queue->enqueue($obj2);
 
-        $this->assertEquals(2, count($this->queue));
         $this->assertEquals($obj2, $this->queue->dequeue());
         $this->assertEquals($obj1, $this->queue->dequeue());
     }
 
-    /**
-     * @covers spriebsch\JobQueue\QueueStub
-     */
     public function testDequeueRemovesObjectFromQueue()
     {
         $obj = new Object();
@@ -116,12 +127,8 @@ class QueueStubTest extends PHPUnit_Framework_TestCase
         $result = $this->queue->dequeue();
 
         $this->assertEquals(0, count($this->queue));
-        $this->assertSame($obj, $result);
     }
 
-    /**
-     * @covers spriebsch\JobQueue\QueueStub
-     */
     public function testDequeueRemovesObjectsFromTopOfQueue()
     {
         $obj1 = new Object();
@@ -130,23 +137,24 @@ class QueueStubTest extends PHPUnit_Framework_TestCase
         $this->queue->enqueue($obj1);
         $this->queue->enqueue($obj2);
 
-        $result = $this->queue->dequeue();
-
-        $this->assertEquals(1, count($this->queue));
-        $this->assertSame($obj1, $result);
+        // Uses assertEquals since reference is not the same after
+        // serializing and unserializing the object.
+        $this->assertEquals($obj1, $this->queue->dequeue());
     }
 
-    /**
-     * @covers spriebsch\JobQueue\QueueStub
-     */
-    public function testDequeueReturnsNullOnEmptyQueue()
+    public function testPurgeEmptiesQueue()
     {
-        $this->assertNull($this->queue->dequeue());
+        $obj1 = new Object();
+        $obj2 = new Object();
+
+        $this->queue->enqueue($obj1);
+        $this->queue->enqueue($obj2);
+        
+        $this->queue->purge();
+
+        $this->assertEquals(0, count($this->queue));
     }
 
-    /**
-     * @covers spriebsch\JobQueue\QueueStub
-     */
     public function testEnqueueWorksOnEmptiedQueue()
     {
         $obj1 = new Object();
